@@ -6,6 +6,12 @@ import random
 
 
 class Agent:
+    mur = 8
+    dirs = {
+        'n': (-1, 0), 's': (1, 0), 'w': (0, -1), 'e': (0, 1),
+        'nw': (-1, -1), 'ne': (-1, 1), 'se': (1, 1), 'sw': (1, -1)
+    }
+
     def __init__(self, parent: 'CellAutomata', name: str, val: int, pos: np.ndarray):
         self._parent = parent
         self.name = name
@@ -52,22 +58,22 @@ class Agent:
     def value(self, val: int):
         self._val = val
 
-    def move(self, dir: np.ndarray):
-        d = dir.copy()
-        if (self.position[0] < 2 and d[0] == -1) or (self.position[0] >= self._parent.size[0] - 2 and d[0] == 1):
-            d[0] = -d[0]
-        if (self.position[1] < 2 and d[1] == -1) or (self.position[1] >= self._parent.size[1] - 2 and d[1] == 1):
-            d[1] = -d[1]
-        self.position += d
+    def move(self):
+        for _ in range(self.mur):
+            key = random.choice(tuple(self.dirs.keys()))
+            d = np.array(self.dirs[key])
+
+            if (self.position[0] < 2 and d[0] == -1) or (self.position[0] >= self._parent.size[0] - 2 and d[0] == 1):
+                d[0] = -d[0]
+            if (self.position[1] < 2 and d[1] == -1) or (self.position[1] >= self._parent.size[1] - 2 and d[1] == 1):
+                d[1] = -d[1]
+
+            if self._parent.isEmptyCell(self.position + d):
+                self.position += d
+                break
 
 
 class CellAutomata:
-    dirs = {
-        'n': (-1, 0), 's': (1, 0), 'w': (0, -1), 'e': (0, 1),
-        'nw': (-1, -1), 'ne': (-1, 1), 'se': (1, 1), 'sw': (1, -1)
-    }
-    mur = 8
-
     def __init__(self, n_agents: int = 1, size: np.ndarray = np.array((100, 100))):
         random.seed(1251)
         self._cells = self._initCells(size+2)
@@ -100,18 +106,17 @@ class CellAutomata:
         for _ in range(iters):
             for agent in self._agents:
                 if self._isEmptyNeighborhood(agent.position):
-                    agent.move(self._getDir())
+                    agent.move()
             self._updateCells()
 
-    def _getDir(self) -> np.ndarray:
-        k = random.choice(tuple(self.dirs.keys()))
-        return np.array(self.dirs[k])
-
     def _isEmptyNeighborhood(self, pos: np.ndarray) -> bool:
-        for i in range(-1, 2):
-            for j in range(-1, 2):
-                if self._cells[pos[0]+i, pos[1]+j] != 0 and i != 0 and j != 0:
-                    return False
+        i, j = pos
+        if any(self._cells[i-1, j-1:j+2] != 0):
+            return False
+        if any(self._cells[i+1, j-1:j+2] != 0):
+            return False
+        if self._cells[i, j-1] != 0 or self._cells[i, j+1] != 0:
+            return False
         return True
 
     def _updateCells(self):
@@ -128,6 +133,11 @@ class CellAutomata:
         if save:
             plt.savefig(f'plot_{i}.png')
         plt.show()
+
+    def isEmptyCell(self, pos: np.ndarray) -> bool:
+        if self._cells[pos[0], pos[1]] == 0:
+            return True
+        return False
 
     def getCells(self) -> np.ndarray:
         return self._cells
