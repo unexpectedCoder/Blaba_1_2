@@ -6,7 +6,7 @@ from automata import CellAutomata
 
 
 def main():
-    iters = 500
+    iters = 1000
     nAgents = 100
     size = np.array((100, 100))
 
@@ -73,7 +73,7 @@ def animate(i, ax, data, iters: int):
     if i < iters:
         ax.clear()
         d = data[f'arr_{i}']        # arr_0, arr_1 и т.д. - это ключи по-умолчанию для numpy.savez()
-        ax.matshow(d, cmap='jet')
+        ax.matshow(d, cmap='binary')
         plt.title(f'Итерация #{i+1}')
     return
 

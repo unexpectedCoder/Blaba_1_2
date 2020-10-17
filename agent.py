@@ -84,23 +84,3 @@ class Agent:
         if (self.position[1] < 2 and d[1] == -1) or (self.position[1] >= self._parent.size[1] - 2 and d[1] == 1):
             d[1] = -d[1]
         return d
-
-    # def _moveFriendlyCase(self):
-    #     for _ in range(self.mur):
-    #         key = random.choice(tuple(self.dirs.keys()))
-    #         d = np.array(self.dirs[key])
-    #         d = self._sideCells(d)
-    #
-    #         if self._parent.isEmptyCell(self.position + d):
-    #             self.position += d
-    #             break
-
-    # def _moveEnemyCase(self):
-    #     for _ in range(self.mur):
-    #         key = random.choice(tuple(self.dirs.keys()))
-    #         d = np.array(self.dirs[key])
-    #         d = self._sideCells(d)
-    #
-    #         if self._parent.isEmptyCell(self.position + d):
-    #             self.position += d
-    #             break

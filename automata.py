@@ -1,6 +1,7 @@
 from typing import List, Tuple
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 from agent import Agent
 
@@ -84,20 +85,6 @@ class CellAutomata:
                     return False
         return True
 
-    def show(self, save=False):
-        """Показать текущее состояние автомата.
-
-        :param save: сохранять ли картинки.
-        """
-        fig = plt.figure(f'Результат', figsize=(10, 8))
-        ax = fig.add_subplot(1, 1, 1)
-        p = ax.matshow(self._cells, cmap='jet')
-        plt.colorbar(p)
-        plt.title(f'Итерация #{self._iter}')
-        if save:
-            plt.savefig(f'pics/plot_{self._iter}.png')
-        plt.show()
-
     def isEmptyCell(self, pos: np.ndarray) -> bool:
         """Проверить, является ли клетка в позиции pos пустой.
 
@@ -129,9 +116,27 @@ class CellAutomata:
                     fr += 1
         return fr - 1, en
 
-    def getCells(self) -> np.ndarray:
-        return self._cells
-
     @property
     def size(self) -> Tuple[int, int]:
+        """Размер клеточного автомата."""
         return self._cells.shape
+
+    def getCells(self) -> np.ndarray:
+        """Текущее состояние клеточного автомата."""
+        return self._cells
+
+    def show(self, save=False):
+        """Показать текущее состояние автомата.
+
+        :param save: сохранять ли картинки.
+        """
+        fig = plt.figure(f'Результат', figsize=(10, 8))
+        ax = fig.add_subplot(1, 1, 1)
+        p = ax.matshow(self._cells, cmap='binary')
+        plt.colorbar(p)
+        plt.title(f'Итерация #{self._iter}')
+        if save:
+            if not os.path.exists('pics'):
+                os.mkdir('pics')
+            plt.savefig(f'pics/plot_{self._iter}.png')
+        plt.show()
