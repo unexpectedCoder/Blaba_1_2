@@ -59,14 +59,32 @@ class Agent:
         self._val = val
 
     def move(self):
+        if self._parent.isEmptyNeighborhood(self.position):
+            self._moveEmptyCase()
+        elif self._parent.isFriendlyNeighborhood(self.value, self.position):
+            self._moveFriendlyCase()
+
+    def _moveEmptyCase(self):
         for _ in range(self.mur):
             key = random.choice(tuple(self.dirs.keys()))
             d = np.array(self.dirs[key])
+            d = self._sideCells(d)
+            if self._parent.isEmptyCell(self.position + d):
+                self.position += d
+                break
 
-            if (self.position[0] < 2 and d[0] == -1) or (self.position[0] >= self._parent.size[0] - 2 and d[0] == 1):
-                d[0] = -d[0]
-            if (self.position[1] < 2 and d[1] == -1) or (self.position[1] >= self._parent.size[1] - 2 and d[1] == 1):
-                d[1] = -d[1]
+    def _sideCells(self, d: np.ndarray) -> np.ndarray:
+        if (self.position[0] < 2 and d[0] == -1) or (self.position[0] >= self._parent.size[0] - 2 and d[0] == 1):
+            d[0] = -d[0]
+        if (self.position[1] < 2 and d[1] == -1) or (self.position[1] >= self._parent.size[1] - 2 and d[1] == 1):
+            d[1] = -d[1]
+        return d
+
+    def _moveFriendlyCase(self):
+        for _ in range(self.mur):
+            key = random.choice(tuple(self.dirs.keys()))
+            d = np.array(self.dirs[key])
+            d = self._sideCells(d)
 
             if self._parent.isEmptyCell(self.position + d):
                 self.position += d
@@ -105,11 +123,10 @@ class CellAutomata:
     def update(self, iters: int = 1):
         for _ in range(iters):
             for agent in self._agents:
-                if self._isEmptyNeighborhood(agent.position):
-                    agent.move()
-            self._updateCells()
+                agent.move()
+                self._updateCells()
 
-    def _isEmptyNeighborhood(self, pos: np.ndarray) -> bool:
+    def isEmptyNeighborhood(self, pos: np.ndarray) -> bool:
         i, j = pos
         if any(self._cells[i-1, j-1:j+2] != 0):
             return False
@@ -117,6 +134,13 @@ class CellAutomata:
             return False
         if self._cells[i, j-1] != 0 or self._cells[i, j+1] != 0:
             return False
+        return True
+
+    def isFriendlyNeighborhood(self, val: int, pos: np.ndarray) -> bool:
+        for x in range(-1, 2):
+            for y in range(-1, 2):
+                if self._cells[pos[0]+x, pos[1]+y] != val and self._cells[pos[0]+x, pos[1]+y] != 0:
+                    return False
         return True
 
     def _updateCells(self):
@@ -139,6 +163,11 @@ class CellAutomata:
             return True
         return False
 
+    def isFriendlyCell(self, val: int, pos: np.ndarray) -> bool:
+        if self._cells[pos[0], pos[1]] == val:
+            return True
+        return False
+
     def getCells(self) -> np.ndarray:
         return self._cells
 
@@ -152,14 +181,14 @@ def main():
     agents = 100
 
     # Для требующихся промежуточных графиков
-    ca = CellAutomata(n_agents=agents)
-    ca.show(save=True)
-    ca.update(iters=iters//10)
-    ca.show(iters//10, save=True)
-    ca.update(iters=iters//2)
-    ca.show(iters//2, save=True)
-    ca.update(iters=iters)
-    ca.show(iters, save=True)
+    # ca = CellAutomata(n_agents=agents)
+    # ca.show(save=True)
+    # ca.update(iters=iters//10)
+    # ca.show(iters//10, save=True)
+    # ca.update(iters=iters//2)
+    # ca.show(iters//2, save=True)
+    # ca.update(iters=iters)
+    # ca.show(iters, save=True)
 
     datafile = 'data.npz'
     ca = CellAutomata(n_agents=agents)
