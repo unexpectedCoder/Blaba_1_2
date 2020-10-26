@@ -3,15 +3,16 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 from automata import CellAutomata
+import visualizer as vis
 
 
 def main():
     iters = 1000
-    nAgents = 100
+    nAgents = 400
     size = np.array((100, 100))
 
-    createPicsForReport(iters, nAgents, size)
-    computingWithAnimation(iters, nAgents, size)
+    # createPicsForReport(iters, nAgents, size)
+    computingWithAnimation(iters, nAgents, size, pygame=True)
 
     return 0
 
@@ -36,12 +37,14 @@ def createPicsForReport(iters: int, n_agents: int, size=np.array((100, 100))):
     ca.show(save=True)
 
 
-def computingWithAnimation(iters: int, n_agents: int, size=np.array((100, 100))):
+def computingWithAnimation(iters: int, n_agents: int, size=np.array((100, 100)),
+                           pygame: bool = False):
     """Анимированное моделирование эволюции клеточного автомата.
 
     :param iters: кол-во итераций эволюции клеточного автомата.
     :param n_agents: кол-во агентов с каждой стороны.
     :param size: размер клеточного автомата.
+    :param pygame: использовать для показа анимации PyGame (True) или matplotlib (False).
     """
     datafile = 'data.npz'
     ca = CellAutomata(n_agents=n_agents, size=size)
@@ -52,10 +55,13 @@ def computingWithAnimation(iters: int, n_agents: int, size=np.array((100, 100)))
         res.append(ca.getCells())
     np.savez(datafile, *np.array(res))
 
-    showAnimated(datafile, iters)
+    if not pygame:
+        showInPyPlot(datafile, iters)
+    else:
+        showInPyGame(datafile, iters)
 
 
-def showAnimated(datafile, iters: int):
+def showInPyPlot(datafile: str, iters: int):
     """Показать анимацию эволюции клеточного автомата.
 
     :param datafile: имя файла с данными numpy.
@@ -76,6 +82,14 @@ def animate(i, ax, data, iters: int):
         ax.matshow(d, cmap='binary')
         plt.title(f'Итерация #{i+1}')
     return
+
+
+def showInPyGame(datafile: str, iters: int):
+    data = np.load(datafile)
+    dataList = [d for d in data.values()]
+
+    v = vis.Visualizer()
+    v.show(dataList, iters)
 
 
 if __name__ == '__main__':
