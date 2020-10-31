@@ -17,7 +17,7 @@ class Visualizer:
         self.lx, self.ly = None, None
         self.xmargin, self.ymargin = None, None
 
-        self._fps = 30
+        self._fps = 25
         self.fpsClock = pygame.time.Clock()
 
         # PyGame
@@ -47,6 +47,10 @@ class Visualizer:
                         self._fps += 1 if self._fps < 30 else 0
                     if event.key == K_DOWN:
                         self._fps -= 1 if self._fps > 1 else 0
+                    if event.key == K_b:
+                        i = 0
+                    if event.key == K_e:
+                        i = iters - 1
                     if event.key == K_SPACE and not start:
                         start = True if i < iters - 1 else False
                     elif start:

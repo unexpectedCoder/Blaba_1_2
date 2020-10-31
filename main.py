@@ -1,19 +1,25 @@
 import numpy as np
+import os
 
 from automata import CellAutomata
 import visualizer as vis
 
 
 def main():
-    nAgents = 500
+    nAgents = 1000
     fieldSize = np.array((100, 100))
 
-    choice = input("Только анимация? (+/-): ")
-    if choice == '-':
+    if os.path.isfile('data.npz'):
+        choice = input("Выполнить моделирование (1) или показать только анимацию (2): ")
+        if choice == '1':
+            nIters = startModeling(nAgents, fieldSize)
+            print("Итоговое число итераций:", nIters)
+            show('data.npz')
+        else:
+            show('data.npz')
+    else:
         nIters = startModeling(nAgents, fieldSize)
         print("Итоговое число итераций:", nIters)
-        show('data.npz')
-    else:
         show('data.npz')
 
     return 0

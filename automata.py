@@ -43,26 +43,27 @@ class CellAutomata:
         """
         vals = np.array([a.value for a in self._agents])
         if not np.all(vals == np.full_like(vals, self._agents[0].value)):
-            agents = self._agents.copy()
+            agents = np.array(self._agents)
             np.random.shuffle(agents)
+
             for agent in agents:
-                agent.move()
+                agent.update()
+                self._updateAgentsList()
                 self._updateCells()
             self._iter += 1
+
             return True
         return False
 
+    def _updateAgentsList(self):
+        for a in self._agents:
+            if not a.isAlive:
+                self._agents.remove(a)
+
     def _updateCells(self):
-        deads = []
         self._cells = np.zeros_like(self._cells)
         for a in self._agents:
-            if a.isAlive:
-                self._cells[a.position[0], a.position[1]] = a.value
-            else:
-                self._cells[a.position[0], a.position[1]] = 0
-                deads.append(a)
-        for dead in deads:
-            self._agents.remove(dead)
+            self._cells[a.position[0], a.position[1]] = a.value
 
     def isEmptyNeighborhood(self, pos: np.ndarray) -> bool:
         """Проверить, пуста ли окрестность Мура для клетки с позицией pos.
@@ -70,9 +71,9 @@ class CellAutomata:
         :param pos: позиция рассматриваемой клетки.
         """
         i, j = pos
-        if any(self._cells[i-1, j-1:j+2] != 0):
+        if np.any(self._cells[i-1, j-1:j+2] != 0):
             return False
-        if any(self._cells[i+1, j-1:j+2] != 0):
+        if np.any(self._cells[i+1, j-1:j+2] != 0):
             return False
         if self._cells[i, j-1] != 0 or self._cells[i, j+1] != 0:
             return False
@@ -84,10 +85,9 @@ class CellAutomata:
         :param val: идентификатор "союзников" (должно быть таким же, как у вызвавшего экземпляра).
         :param pos: позиция рассматриваемой клетки.
         """
-        for x in range(-1, 2):
-            for y in range(-1, 2):
-                if self._cells[pos[0]+x, pos[1]+y] != val and self._cells[pos[0]+x, pos[1]+y] != 0:
-                    return False
+        sub = self._cells[pos[0]-1:pos[0]+2, pos[1]-1:pos[1]+2]
+        if np.any(sub[sub != val] != 0):
+            return False
         return True
 
     def isEmptyCell(self, pos: np.ndarray) -> bool:

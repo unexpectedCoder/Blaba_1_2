@@ -55,7 +55,8 @@ class Agent:
     def value(self, val: int):
         self._val = val
 
-    def move(self):
+    def update(self):
+        """Обновить состояние агента (клетки)."""
         if self._parent.isEmptyNeighborhood(self.position):
             self._updatePosition()
         elif self._parent.isFriendlyNeighborhood(self.value, self.position):
@@ -66,19 +67,17 @@ class Agent:
                 self.isAlive = True if np.random.random() < .5 else False
             elif enemies > friends:
                 self.isAlive = False
-            else:
-                self._updatePosition()
 
     def _updatePosition(self):
         for _ in range(self.mur):
             key = random.choice(tuple(self.dirs.keys()))
             d = np.array(self.dirs[key])
-            d = self._sideCells(d)
+            d = self._sideCellCase(d)
             if self._parent.isEmptyCell(self.position + d):
                 self.position += d
                 break
 
-    def _sideCells(self, d: np.ndarray) -> np.ndarray:
+    def _sideCellCase(self, d: np.ndarray) -> np.ndarray:
         if (self.position[0] < 2 and d[0] == -1) or (self.position[0] >= self._parent.size[0] - 2 and d[0] == 1):
             d[0] = -d[0]
         if (self.position[1] < 2 and d[1] == -1) or (self.position[1] >= self._parent.size[1] - 2 and d[1] == 1):
