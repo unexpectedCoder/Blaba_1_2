@@ -36,7 +36,7 @@ def startModeling(n_agents: int, field_size: np.ndarray, iters: int = None) -> i
     print("Идёт моделирование...")
 
     datafile = 'data.npz'
-    ca = CellAutomata(n_agents=n_agents, size=field_size)
+    ca = CellAutomata(n_agents=n_agents, field_size=field_size)
     res = [ca.getCells()]
 
     if iters:

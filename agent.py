@@ -1,3 +1,4 @@
+from typing import Union
 import numpy as np
 import random
 
@@ -19,9 +20,12 @@ class Agent:
     def __repr__(self):
         return f"Agent {self.name}: val={self.value}\tpos={self.position}"
 
-    def __eq__(self, other: 'Agent'):
+    def __eq__(self, other: Union['Agent', np.ndarray]):
         if self is other:
             return True
+        if isinstance(other, np.ndarray):
+            if all(self.position == other):
+                return True
         if all(self.position == other.position):
             return True
         return False
@@ -64,7 +68,7 @@ class Agent:
         else:
             friends, enemies = self._parent.calcFriendsEnemies(self.value, self.position)
             if friends == 0 and enemies == 1:
-                self.isAlive = True if np.random.random() < .5 else False
+                self.isAlive = np.random.choice((True, False))
             elif enemies > friends:
                 self.isAlive = False
 
@@ -72,14 +76,13 @@ class Agent:
         for _ in range(self.mur):
             key = random.choice(tuple(self.dirs.keys()))
             d = np.array(self.dirs[key])
-            d = self._sideCellCase(d)
+            self._sideCellCase(d)
             if self._parent.isEmptyCell(self.position + d):
                 self.position += d
                 break
 
-    def _sideCellCase(self, d: np.ndarray) -> np.ndarray:
+    def _sideCellCase(self, d: np.ndarray):
         if (self.position[0] < 2 and d[0] == -1) or (self.position[0] >= self._parent.size[0] - 2 and d[0] == 1):
             d[0] = -d[0]
         if (self.position[1] < 2 and d[1] == -1) or (self.position[1] >= self._parent.size[1] - 2 and d[1] == 1):
             d[1] = -d[1]
-        return d
