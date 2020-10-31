@@ -17,7 +17,7 @@ class Visualizer:
         self.lx, self.ly = None, None
         self.xmargin, self.ymargin = None, None
 
-        self.FPS = 25
+        self._fps = 30
         self.fpsClock = pygame.time.Clock()
 
         # PyGame
@@ -26,21 +26,42 @@ class Visualizer:
         pygame.display.set_caption("Cellular Automata")
 
     def show(self, data: List[np.ndarray], iters: int):
+        fontObj = pygame.font.Font('roboto.ttf', 20)
+
         i = 0
-        isRun = True
+        isRun, start = True, False
         while True:
-            self.fpsClock.tick(self.FPS)
+            self.fpsClock.tick(self._fps)
             self.drawField(data[i])
 
             for event in pygame.event.get():
                 if event.type == QUIT:
                     pygame.quit()
                     isRun = False
+                if event.type == KEYDOWN:
+                    if event.key == K_RIGHT:
+                        i += 1 if i < iters - 1 else 0
+                    if event.key == K_LEFT:
+                        i -= 1 if i > 0 else 0
+                    if event.key == K_UP:
+                        self._fps += 1 if self._fps < 30 else 0
+                    if event.key == K_DOWN:
+                        self._fps -= 1 if self._fps > 1 else 0
+                    if event.key == K_SPACE and not start:
+                        start = True if i < iters - 1 else False
+                    elif start:
+                        start = False
             if not isRun:
                 break
+
+            txt = fontObj.render(f'Итерация #{i}   FPS: {self.fpsClock.get_fps():.1f}', True, BLACK)
+            self.DISPLAYSURF.blit(txt, (0, 0))
             pygame.display.update()
-            if i < iters:
+
+            if start:
                 i += 1
+                if i == iters - 1:
+                    start = False
 
     def drawField(self, data: np.ndarray):
         self.DISPLAYSURF.fill(WHITE)

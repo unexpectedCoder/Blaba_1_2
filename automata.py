@@ -1,7 +1,5 @@
 from typing import List, Tuple
 import numpy as np
-import matplotlib.pyplot as plt
-import os
 
 from agent import Agent
 
@@ -10,8 +8,6 @@ class CellAutomata:
     """Класс клеточного автомата."""
 
     def __init__(self, n_agents: int = 1, size: np.ndarray = np.array((100, 100))):
-        np.random.seed(1251)
-
         self._iter = 0
 
         self._cells = self._initCells(size+2)
@@ -40,12 +36,21 @@ class CellAutomata:
                     agents.append(Agent(self, 'B', val, np.array((i, j))))
         return agents
 
-    def update(self):
-        """Функция эволюции клеточного автомата."""
-        for agent in self._agents:
-            agent.move()
-            self._updateCells()
-        self._iter += 1
+    def update(self) -> bool:
+        """Функция эволюции клеточного автомата.
+
+        :return: Флаг *True*, если есть клетки-противники или *False*, если остались клетки одной стороны.
+        """
+        vals = np.array([a.value for a in self._agents])
+        if not np.all(vals == np.full_like(vals, self._agents[0].value)):
+            agents = self._agents.copy()
+            np.random.shuffle(agents)
+            for agent in agents:
+                agent.move()
+                self._updateCells()
+            self._iter += 1
+            return True
+        return False
 
     def _updateCells(self):
         deads = []
@@ -121,22 +126,10 @@ class CellAutomata:
         """Размер клеточного автомата."""
         return self._cells.shape
 
+    @property
+    def totalIters(self) -> int:
+        return self._iter
+
     def getCells(self) -> np.ndarray:
         """Текущее состояние клеточного автомата."""
         return self._cells
-
-    def show(self, save=False):
-        """Показать текущее состояние автомата.
-
-        :param save: сохранять ли картинки.
-        """
-        fig = plt.figure(f'Результат', figsize=(10, 8))
-        ax = fig.add_subplot(1, 1, 1)
-        p = ax.matshow(self._cells, cmap='binary')
-        plt.colorbar(p)
-        plt.title(f'Итерация #{self._iter}')
-        if save:
-            if not os.path.exists('pics'):
-                os.mkdir('pics')
-            plt.savefig(f'pics/plot_{self._iter}.png')
-        plt.show()

@@ -19,7 +19,7 @@ class Agent:
     def __repr__(self):
         return f"Agent {self.name}: val={self.value}\tpos={self.position}"
 
-    def __eq__(self, other):
+    def __eq__(self, other: 'Agent'):
         if self is other:
             return True
         if all(self.position == other.position):
